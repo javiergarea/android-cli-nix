@@ -1,0 +1,26 @@
+name: Create version tag
+
+on:
+  push:
+    branches: [main]
+    paths: [package.nix]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          version=$(grep 'version = "' package.nix | head -1 | sed 's/.*version = "\(.*\)";/\1/')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag
+        run: |
+          git tag "v${{ steps.version.outputs.version }}" || true
+          git push origin "v${{ steps.version.outputs.version }}" || true

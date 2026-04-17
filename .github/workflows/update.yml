@@ -1,0 +1,57 @@
+name: Update Android CLI
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    outputs:
+      needs-update: ${{ steps.check.outputs.needs-update }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - id: check
+        run: |
+          if ./scripts/update-version.sh --check; then
+            echo "needs-update=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs-update=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  update:
+    needs: check-update
+    if: needs.check-update.outputs.needs-update == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Update version
+        run: ./scripts/update-version.sh
+
+      - name: Update flake inputs
+        run: nix flake update
+
+      - name: Verify build
+        run: nix build .#android-cli --impure
+
+      - name: Extract version
+        id: version
+        run: |
+          version=$(grep 'version = "' package.nix | head -1 | sed 's/.*version = "\(.*\)";/\1/')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          title: "Update android-cli to ${{ steps.version.outputs.version }}"
+          body: "Automated update of Android CLI to version ${{ steps.version.outputs.version }}"
+          branch: update/android-cli-${{ steps.version.outputs.version }}
+          commit-message: "chore: update android-cli to ${{ steps.version.outputs.version }}"
+          delete-branch: true
