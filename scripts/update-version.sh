@@ -15,7 +15,7 @@ get_latest_version() {
 
 LATEST_VERSION=$(get_latest_version)
 
-if [[ "$1" == "--check" ]]; then
+if [[ "${1:-}" == "--check" ]]; then
   if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
     echo "Already up to date: $CURRENT_VERSION"
     exit 1
@@ -45,8 +45,7 @@ for nix_platform in "${!PLATFORMS[@]}"; do
   nix_hash=$(nix-prefetch-url --type sha256 "$url" 2>/dev/null)
   sri_hash=$(nix hash convert --hash-algo sha256 --to sri "$nix_hash")
 
-  old_hash=$(grep -A1 "\"$nix_platform\"" "$PACKAGE_FILE" | grep 'sha256-' | sed 's/.*"\(sha256-[^"]*\)".*/\1/')
-  sed -i "s|$old_hash|$sri_hash|" "$PACKAGE_FILE"
+  sed -i "s|\"$nix_platform\" = \"sha256-[^\"]*\"|\"$nix_platform\" = \"$sri_hash\"|" "$PACKAGE_FILE"
   echo "  $nix_platform: $sri_hash"
 done
 
