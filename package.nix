@@ -6,11 +6,11 @@
 }:
 
 let
-  version = "0.7.15303877";
+  version = "0.7.15326717";
 
   platformHashes = {
-    "x86_64-linux" = "sha256-y4woDP/5fqc6C6U50jXaOqiDBZzzENZSbHUCTt2zKic=";
-    "aarch64-darwin" = "sha256-N70ts4oIEp2vYzxPqnqi30lW/+UUGT/bucO6nHs8jUY=";
+    "x86_64-linux" = "sha256-JtvdSQKKluLE/D/Asow2afsQCmOZ62xIMyIMElNl1l8=";
+    "aarch64-darwin" = "sha256-PDS4+90bGYCHbOwdzUBmuCKTOt2aduyfmAeGwe6PmoU=";
   };
 
   platformUrls = {
