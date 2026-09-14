@@ -51,3 +51,4 @@ jobs:
         with:
           commit_message: "chore: update android-cli to ${{ steps.version.outputs.version }}"
           file_pattern: "package.nix flake.lock"
+          tagging_message: "v${{ steps.version.outputs.version }}"
